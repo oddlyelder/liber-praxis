@@ -28,4 +28,41 @@ anywhere, and our servers hold only ciphertext we cannot read.
    storage or transmission
 4. A 24-word BIP39 recovery phrase is generated at account creation — 
    the practitioner stores this offline, Liber Praxis never holds it
-5. Optional encrypted sync to
+5. Optional encrypted sync to AWS S3 — only ciphertext reaches the server
+6. Cross-device access works by downloading and decrypting blobs locally 
+   on each device
+
+## Architecture
+
+- **Frontend:** React + TypeScript
+- **Local database:** SQLite via sql.js (browser) / better-sqlite3 (desktop)
+- **Encryption:** libsodium-wrappers (XSalsa20-Poly1305)
+- **Key derivation:** Argon2id via argon2-browser
+- **Sync:** PowerSync (local-first, conflict-free)
+- **Cloud storage:** AWS S3 (encrypted blobs only)
+- **Desktop:** Tauri (Phase 3)
+- **Billing:** Stripe
+
+## What we never do
+
+- Store readable patient data on our servers
+- Transmit the encryption key
+- Hold the recovery phrase
+- Install analytics inside the application
+- Share data with third parties
+
+## Security
+
+See SECURITY.md for our responsible disclosure policy.
+
+The encryption layer is open source and auditable. 
+We use only established, well-audited cryptographic libraries. 
+We do not write custom cryptographic code.
+
+## Development status
+
+Phase 1 — MVP in development
+
+## License
+
+MIT
