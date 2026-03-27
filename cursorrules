@@ -1,0 +1,151 @@
+# Liber Praxis — Cursor Agent Rules
+
+You are assisting a non-technical solo founder named Sean (Lafayette, LA)
+building Liber Praxis — a privacy-native, local-first, end-to-end encrypted
+practice management platform for licensed behavioral health professionals
+(therapists, counselors, psychiatrists).
+
+---
+
+## Project Identity
+
+- Product name: Liber Praxis ("The Book of Practice")
+- GitHub: https://github.com/oddlyelder/liber-praxis (public, MIT license)
+- Domain: liberpraxis.com (registered on Namecheap, March 2026)
+- GitHub handle: oddlyelder
+
+---
+
+## Core Architecture — Non-Negotiable Constraints
+
+1. Local-first: SQLite via sql.js as primary data store, works fully offline
+2. End-to-end encrypted: Argon2id key derivation from password locally,
+   libsodium XSalsa20-Poly1305 for data encryption, key never transmitted
+3. Optional encrypted sync to AWS S3 — only ciphertext reaches the server
+4. React + TypeScript frontend (Vite)
+5. BIP39 24-word recovery phrase at account creation — never held by Liber Praxis
+6. Designed to wrap into Tauri desktop app in a later phase
+7. No analytics inside the application — Simple Analytics on marketing site only
+8. Opt-in error reporting via Sentry with aggressive data scrubbing, off by default
+
+---
+
+## Technology Stack
+
+- Frontend: React + TypeScript (Vite)
+- Local DB: sql.js (SQLite via WASM)
+- Encryption: libsodium-wrappers (XSalsa20-Poly1305)
+- Key derivation: argon2-browser (Argon2id)
+- Recovery phrase: bip39
+- IndexedDB persistence: Dexie.js
+- Sync: PowerSync (planned)
+- Cloud storage: AWS S3 (encrypted blobs only)
+- Desktop: Tauri (Phase 3)
+- Billing: Stripe
+- Clearinghouse: Office Ally (Phase 3)
+- E-prescribing: DoseSpot API (Phase 4)
+- Marketing analytics: Simple Analytics (marketing site only)
+- Error reporting: Sentry (opt-in, inside app only)
+
+---
+
+## Folder Structure
+
+```
+src/
+├── crypto/           # LP-01 — encryption, key derivation, recovery phrase
+├── database/         # LP-02 — schema, encrypted storage, repositories
+├── features/         # LP-03+ — auth, clients, sessions, documents, scheduling
+│   ├── auth/
+│   ├── clients/
+│   ├── sessions/
+│   ├── documents/
+│   └── scheduling/
+├── sync/             # S3 encrypted sync (later phase)
+├── components/       # shared UI components
+├── hooks/            # shared React hooks
+└── types/            # shared TypeScript types
+```
+
+---
+
+## What Has Been Built
+
+### LP-01 — Encryption Layer ✅
+Files in `src/crypto/`:
+- `keyDerivation.ts` — Argon2id key derivation, 64MB memory, 3 iterations, 32-byte output
+- `encryption.ts` — libsodium XSalsa20-Poly1305 secretbox, explicit constants (KEY=32, NONCE=24, MAC=16), ensureSodiumReady() pattern
+- `recoveryPhrase.ts` — BIP39 24-word phrase generation and key reconstruction
+- Tests for all three — 20 passing
+
+Note: test environment requires setup shims for argon2-browser and
+libsodium-wrappers (Node.js/ESM compatibility). These are test harness
+fixes only, not production code changes. Tracked as technical debt.
+
+### LP-02 — Database Layer 🔄 (built, pending commit)
+Files in `src/database/`:
+- `schema.ts` — TypeScript types and SQL schema for tables: accounts, clients, sessions, documents
+- `db.ts` — sql.js initialization, table creation, Dexie/IndexedDB persistence
+- `encryptedStorage.ts` — generic encrypted read/write using crypto layer
+- `accountRepository.ts` — account-specific repository using encryptedStorage
+- Tests for encryptedStorage and accountRepository
+- `src/types/sqljs.d.ts` — minimal sql.js type declaration
+
+Status: 30 tests passing. Bug identified in `accountRepository.ts` upsert method —
+the `??` operator treats null and undefined identically, preventing callers from
+explicitly clearing fields. Fix in progress.
+
+---
+
+## Roadmap
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| 0 | Validation — 10 pre-orders before building | Pending |
+| 1 | MVP: account creation, local encrypted DB, client records, session notes, intake forms, scheduling, optional S3 sync | In progress |
+| 2 | Launch, privacy comparison content, community distribution, referral program | Pending |
+| 3 | Insurance billing (Office Ally), Tauri desktop app | Pending |
+| 4 | DoseSpot e-prescribing, multi-practitioner, self-hosted Docker | Pending |
+| 5 | React Native mobile, telehealth (Daily.co or Whereby) | Pending |
+| 6 | Audio recording + local Whisper transcription (feature-flagged, not visible until fully tested and audited) | Pending |
+
+---
+
+## Pricing
+
+- Solo: $99/month or $89/month annual
+- Practice (2–5): $199/month
+- Group (6–15): $349/month
+- Founding members: $59/month locked for life
+
+---
+
+## Coding Session Rules
+
+- One specific task per session, no exceptions
+- Always run `npm run test:run` before committing anything
+- Always run `git add`, `git commit` with descriptive message, `git push` after each completed session
+- Commit message format: brief description of what was built
+- Never commit `.env` files or credentials
+- Explain every security decision and identify weaknesses after each file
+
+---
+
+## Working with Sean
+
+- Non-technical solo founder learning as he goes
+- Prefers step-by-step explanations before taking action
+- Prefers plain, direct communication — no flattery, no filler
+- Has Meta SQL/Python certificates, Google IT Support certificate, UC Davis SEO/Digital Marketing certification
+- Background: software support (Gemvision), CAD design, operations management, law enforcement
+
+---
+
+## Current Session Checklist (LP-02 Closeout)
+
+1. Confirm upsert bug fix is applied in `accountRepository.ts`
+2. Run `npm run test:run` — all 30 tests must pass
+3. `git add .`
+4. `git commit -m "Add database layer — schema, encrypted storage, account repository"`
+5. `git push`
+6. Update this file: mark LP-02 as ✅, set LP-03 as 🔄
